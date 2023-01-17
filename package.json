@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack serve --config ./src/client/webpack.dev.js",
+    "build": "webpack --config=./src/client/webpack.dev.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -18,5 +19,8 @@
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.11.1",
     "webpack-merge": "^5.8.0"
+  },
+  "dependencies": {
+    "font-awesome": "^4.7.0"
   }
 }
