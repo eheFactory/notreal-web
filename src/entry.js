@@ -118,11 +118,12 @@ export class App{
 
         this.controllers = this.buildControllers();
         const onSelectStart = () => {
-            this.children[0].scale.z = 10; // 10 = 10 meters
+            console.log(this.children)
+            // this.children[0].scale.z = 10; // 10 = 10 meters
             this.userData.selectPressed = true;
         }
         const onSelectEnd = () => {
-            this.children[0].scale.z = 0;
+            // this.children[0].scale.z = 0;
             this.highlight.visible = false;
             this.userData.selectPressed = false;
         }
@@ -299,7 +300,6 @@ export class App{
 
     remove(){}
 }
-
 
 document.addEventListener("DOMContentLoaded", function () {
     const app = new App();
