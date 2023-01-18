@@ -21,6 +21,9 @@ export class App{
     workingMatrix : THREE.Matrix4;
     workingVector : THREE.Vector3;
     controllers: THREE.XRTargetRaySpace[];
+    highlight: THREE.Mesh;
+    children: any;
+    userData:any;
 	constructor(){
 		const container = document.createElement( 'div' );
 		document.body.appendChild( container );
@@ -107,6 +110,18 @@ export class App{
 
             this.room.add(object);
         }
+
+        this.highlight = new THREE.Mesh( 
+            geometry, 
+            new THREE.MeshBasicMaterial( 
+                { 
+                    color: 0xffffff, 
+                    side: THREE.BackSide 
+                } 
+            ) 
+        );
+        this.highlight.scale.set(1.2, 1.2, 1.2);
+        this.scene.add(this.highlight);
     }
     
     setupXR(){
@@ -115,6 +130,25 @@ export class App{
         const button = new VRButton( this.renderer );
 
         this.controllers = this.buildControllers();
+
+        const onSelectStart = () => {
+            
+            this.children[0].scale.z = 10; // 10 = 10 meters
+            this.userData.selectPressed = true;
+        }
+
+        const onSelectEnd = () => {
+
+            this.children[0].scale.z = 0;
+            this.highlight.visible = false;
+            this.userData.selectPressed = false;
+            
+        }
+        
+        this.controllers.forEach( (controller) => {
+            controller.addEventListener( 'selectstart', onSelectStart );
+            controller.addEventListener( 'selectend', onSelectEnd );
+        });
     }
 
     buildControllers(){
@@ -145,8 +179,26 @@ export class App{
     }
     
     handleController( controller:any ){
-        
+        if (controller.userData.selectPressed ){
+            controller.children[0].scale.z = 10;
+
+            this.workingMatrix.identity().extractRotation( controller.matrixWorld );
+
+            this.raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
+            this.raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( this.workingMatrix );
+
+            const intersects = this.raycaster.intersectObjects( this.room.children );
+
+            if (intersects.length>0){
+                intersects[0].object.add(this.highlight);
+                this.highlight.visible = true;
+                controller.children[0].scale.z = intersects[0].distance;
+            }else{
+                this.highlight.visible = false;
+            }
+        }
     }
+    
 
     resize(){
         this.camera.aspect = window.innerWidth / window.innerHeight;
