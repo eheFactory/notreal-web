@@ -10,14 +10,17 @@ class VRButton{
         this.renderer = renderer;
         
         if ( 'xr' in navigator ) {
+            
             const button = document.createElement('button');
             button.style.display = 'none';
             button.style.height = '40px';
-            document.body.appendChild(button);
-
+            
+            
             navigator.xr?.isSessionSupported('immersive-vr').then((supported)=>{
                 supported ? this.showEnterVR(button) : this.showWebXRNotFound(button);
             })
+
+            document.body.appendChild(button);
 		} else {
             const message = document.createElement('a');
             if(window.isSecureContext === false){
@@ -46,22 +49,6 @@ class VRButton{
         let currentSession:any = null;
         this.stylizeElement(button, true, 30, true);
 
-        button.style.display = '';
-        button.style.right = '20px';
-        button.style.width = '80px';
-        button.style.cursor = 'pointer';
-        button.innerHTML = '<i class="fas fa-vr-cardboard"></i>';
-
-        button.onmouseenter = () => {
-            button.style.fontSize ='12px';
-            button.textContent = (currentSession===null) ? 'ENTER VR' : 'EXIT VR';
-            button.style.opacity = 1;
-        }
-        
-        button.onmouseleave = () => {
-            button.style.fontSize ='30px';
-            button.innerHTML = '<i class="fas fa-vr-cardboard"></i>';
-        }
 
         const onSessionStarted = (session:any) => {
             session.addEventListener('end', onSessionEnded);
@@ -81,8 +68,37 @@ class VRButton{
             currentSession = null;
         }
 
+
+        button.style.display = '';
+        button.style.right = '20px';
+        button.style.width = '80px';
+        button.style.cursor = 'pointer';
+        button.innerHTML = '<i class="fas fa-vr-cardboard"></i>';
+
+        button.onmouseenter = () => {
+            button.style.fontSize ='12px';
+            button.textContent = (currentSession===null) ? 'ENTER VR' : 'EXIT VR';
+            button.style.opacity = '1.0';
+        }
+        
+        button.onmouseleave = () => {
+            button.style.fontSize ='30px';
+            button.innerHTML = '<i class="fas fa-vr-cardboard"></i>';
+            button.style.opacity = '0.5';
+        }
+
+
+
+
         button.onclick(()=>{
             if(currentSession===null){
+                // WebXR's requestReferenceSpace only works if the corresponding feature
+                // was requested at session creation time. For simplicity, just ask for
+                // the interesting ones as optional features, but be aware that the
+                // requestReferenceSpace call will fail if it turns out to be unavailable.
+                // ('local' is always available for immersive sessions and doesn't need to
+                // be requested separately.)
+                
                 const sessionInit = {
                     optionalFeatures:['local-floor', 'bounded-floor']
                 };
