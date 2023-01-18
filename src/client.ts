@@ -22,7 +22,10 @@ export class App{
     workingMatrix : THREE.Matrix4;
     workingVector : THREE.Vector3;
     controllers: THREE.XRTargetRaySpace[];
-    controllerFlashLight: any;
+
+    // uncommetn for custom controller
+    // controllerFlashLight: any;
+    
     highlight: THREE.Mesh;
     children: any;
     userData:any;
@@ -125,7 +128,7 @@ export class App{
             ) 
         );
         this.highlight.scale.set(1.2, 1.2, 1.2);
-        // this.scene.add(this.highlight);
+        this.scene.add(this.highlight);
     }
     
     setupXR(){
@@ -148,88 +151,90 @@ export class App{
             controller.addEventListener( 'selectend', onSelectEnd );
         })
 
-        const onSelectStartFlashLight = () => {
-            this.userData.selectPressed = true;
-            if (this.spotlight) this.spotlight.visible = true;
-        }
-        const onSelectEndFlashLight = () => {
-            this.highlight.visible = false;
-            this.userData.selectPressed = false;
-            if (this.spotlight) this.spotlight.visible = false; 
-        }
-        this.controllerFlashLight = this.renderer.xr.getController( 0 );
-        this.controllerFlashLight.addEventListener( 'selectstart', onSelectStartFlashLight );
-        this.controllerFlashLight.addEventListener( 'selectend', onSelectEndFlashLight );
-        this.controllerFlashLight.addEventListener( 'connected', (event:any)=> {
-            this.buildFlashLightController.call(self, event.data, this );
-        } );
 
-        this.controllerFlashLight.addEventListener( 'disconnected', () => {
-            // while(this.children.length>0) this.remove(this.children[0]);
-            this.controllerFlashLight = null;
+    //     uncomment for custom controller
+    //     const onSelectStartFlashLight = () => {
+    //         this.userData.selectPressed = true;
+    //         if (this.spotlight) this.spotlight.visible = true;
+    //     }
+    //     const onSelectEndFlashLight = () => {
+    //         this.highlight.visible = false;
+    //         this.userData.selectPressed = false;
+    //         if (this.spotlight) this.spotlight.visible = false; 
+    //     }
+    //     this.controllerFlashLight = this.renderer.xr.getController( 0 );
+    //     this.controllerFlashLight.addEventListener( 'selectstart', onSelectStartFlashLight );
+    //     this.controllerFlashLight.addEventListener( 'selectend', onSelectEndFlashLight );
+    //     this.controllerFlashLight.addEventListener( 'connected', (event:any)=> {
+    //         this.buildFlashLightController.call(self, event.data, this );
+    //     } );
+    //     this.controllerFlashLight.addEventListener( 'disconnected', () => {
+    //         // while(this.children.length>0) this.remove(this.children[0]);
+    //         this.controllerFlashLight = null;
 
-        } );
-        this.scene.add( this.controllerFlashLight );
- 
-        this.scene.add(this.highlight);
+    //     } );
+    //     this.scene.add( this.controllerFlashLight );
+    //     this.scene.add(this.highlight);
     }
 
-    buildFlashLightController(data:any, controller:any){
-        let geometry, material, loader;        
-        switch ( data.targetRayMode ) {
+    // uncomment for custom controller
+    // buildFlashLightController(data:any, controller:any){
+    //     let geometry, material, loader;        
+    //     switch ( data.targetRayMode ) {
             
-            case 'tracked-pointer':
+    //         case 'tracked-pointer':
 
-                loader = new GLTFLoader().setPath('../assets/');
-                loader.load( 
-                    'flash-light.glb',
-                    ( gltf ) => {
-                        const flashLight = gltf.scene.children[2];
-                        const scale = 0.6;
-                        flashLight.scale.set(scale, scale, scale);
-                        controller.add( flashLight );
-                        this.spotlight = new THREE.Group();
-                        const spotlight = new THREE.SpotLight( 0xFFFFFF, 2, 12, Math.PI/15, 0.3 );
-                        geometry = new THREE.CylinderGeometry(0.03, 1, 5, 32, 5, true);
-                        geometry.rotateX( Math.PI/2 );
-                        material = new SpotLightVolumetricMaterial();
-                        const cone = new THREE.Mesh( geometry, material );
-                        cone.translateZ( -2.6 );
+    //             loader = new GLTFLoader().setPath('../assets/');
+    //             loader.load( 
+    //                 'flash-light.glb',
+    //                 ( gltf ) => {
+    //                     const flashLight = gltf.scene.children[2];
+    //                     const scale = 0.6;
+    //                     flashLight.scale.set(scale, scale, scale);
+    //                     controller.add( flashLight );
+    //                     this.spotlight = new THREE.Group();
+    //                     const spotlight = new THREE.SpotLight( 0xFFFFFF, 2, 12, Math.PI/15, 0.3 );
+    //                     geometry = new THREE.CylinderGeometry(0.03, 1, 5, 32, 5, true);
+    //                     geometry.rotateX( Math.PI/2 );
+    //                     material = new SpotLightVolumetricMaterial();
+    //                     const cone = new THREE.Mesh( geometry, material );
+    //                     cone.translateZ( -2.6 );
                     
-                        spotlight.position.set(0,0,0);
-                        spotlight.target.position.set(0,0,-1);
-                        this.spotlight.add( spotlight.target );
-                        this.spotlight.add( spotlight );
-                        this.spotlight.add( cone );
+    //                     spotlight.position.set(0,0,0);
+    //                     spotlight.target.position.set(0,0,-1);
+    //                     this.spotlight.add( spotlight.target );
+    //                     this.spotlight.add( spotlight );
+    //                     this.spotlight.add( cone );
                         
-                        controller.add(this.spotlight);
-                        this.spotlight.visible = false;
-                    },
-                    undefined,
-                    (error) =>  {
-                        console.error( 'An error occurred' );    
-                    }
-                );
+    //                     controller.add(this.spotlight);
+    //                     this.spotlight.visible = false;
+    //                 },
+    //                 undefined,
+    //                 (error) =>  {
+    //                     console.error( 'An error occurred' );    
+    //                 }
+    //             );
                 
-                break;
+    //             break;
                 
-            case 'gaze':
+    //         case 'gaze':
 
-                geometry = new THREE.RingGeometry( 0.02, 0.04, 32 ).translate( 0, 0, - 1 );
-                material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true } );
-                controller.add( new THREE.Mesh( geometry, material ) )
+    //             geometry = new THREE.RingGeometry( 0.02, 0.04, 32 ).translate( 0, 0, - 1 );
+    //             material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true } );
+    //             controller.add( new THREE.Mesh( geometry, material ) )
 
-        }
-    }
+    //     }
+    // }
 
-    buildControllers(){
+    
+    buildControllers() {
         const controllerModelFactory = new XRControllerModelFactory();
 
         const geometry = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 ) ] );
 
         const line = new THREE.Line( geometry );
         line.name = 'line';
-		line.scale.z = 10;
+		line.scale.z = 0;
         
         const controllers = [];
         
@@ -269,24 +274,25 @@ export class App{
             }
         }
     }
-    
-    handleFlasLightController( controller:any ){
-        if (controller.userData.selectPressed ){
-            this.workingMatrix.identity().extractRotation( controller.matrixWorld );
 
-            this.raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
-            this.raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( this.workingMatrix );
+    // uncomment for custom controller
+    // handleFlasLightController( controller:any ){
+    //     if (controller.userData.selectPressed ){
+    //         this.workingMatrix.identity().extractRotation( controller.matrixWorld );
 
-            const intersects = this.raycaster.intersectObjects( this.room.children );
+    //         this.raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
+    //         this.raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( this.workingMatrix );
 
-            if (intersects.length>0){
-                intersects[0].object.add(this.highlight);
-                this.highlight.visible = true;
-            }else{
-                this.highlight.visible = false;
-            }
-        }
-    }
+    //         const intersects = this.raycaster.intersectObjects( this.room.children );
+
+    //         if (intersects.length>0){
+    //             intersects[0].object.add(this.highlight);
+    //             this.highlight.visible = true;
+    //         }else{
+    //             this.highlight.visible = false;
+    //         }
+    //     }
+    // }
 
     resize(){
         this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -304,7 +310,10 @@ export class App{
                 self.handleController( controller ) 
             });
         }
-        if (this.controllerFlashLight ) this.handleController( this.controllerFlashLight );
+
+        // uncomment for custom sontroller
+        // if (this.controllerFlashLight ) this.handleController( this.controllerFlashLight );
+
         this.renderer.render( this.scene, this.camera );
     }
 
