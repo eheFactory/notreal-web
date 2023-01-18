@@ -3,7 +3,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory';
 import Stats from 'three/examples/jsm/libs/stats.module'
 import {BoxLineGeometry} from 'three/examples/jsm/geometries/BoxLineGeometry.js'
-
+import { GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import { SpotLightVolumetricMaterial } from './SpotLightVolumetricMaterial';
 // import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { VRButton } from './VRButton';
 
@@ -24,6 +25,7 @@ export class App{
     highlight: THREE.Mesh;
     children: any;
     userData:any;
+    spotlight: THREE.Group;
 	constructor(){
 		const container = document.createElement( 'div' );
 		document.body.appendChild( container );
@@ -149,6 +151,57 @@ export class App{
             controller.addEventListener( 'selectstart', onSelectStart );
             controller.addEventListener( 'selectend', onSelectEnd );
         });
+    }
+
+    buildCustomController(data:any, controller:any){
+        let geometry, material, loader;
+        
+        const self = this;
+        
+        switch ( data.targetRayMode ) {
+            
+            case 'tracked-pointer':
+
+                loader = new GLTFLoader().setPath('../assets/');
+                loader.load( 
+                    'flash-light.glb',
+                    ( gltf ) => {
+                        const flashLight = gltf.scene.children[2];
+                        const scale = 0.6;
+                        flashLight.scale.set(scale, scale, scale);
+                        controller.add( flashLight );
+                        this.spotlight = new THREE.Group();
+                        const spotlight = new THREE.SpotLight( 0xFFFFFF, 2, 12, Math.PI/15, 0.3 );
+                        geometry = new THREE.CylinderGeometry(0.03, 1, 5, 32, 5, true);
+                        geometry.rotateX( Math.PI/2 );
+                        material = new SpotLightVolumetricMaterial();
+                        const cone = new THREE.Mesh( geometry, material );
+                        cone.translateZ( -2.6 );
+                    
+                        spotlight.position.set(0,0,0);
+                        spotlight.target.position.set(0,0,-1);
+                        self.spotlight.add( spotlight.target );
+                        self.spotlight.add( spotlight );
+                        self.spotlight.add( cone );
+                        
+                        controller.add(self.spotlight);
+                        self.spotlight.visible = false;
+                    },
+                    undefined,
+                    (error) =>  {
+                        console.error( 'An error occurred' );    
+                    }
+                );
+                
+                break;
+                
+            case 'gaze':
+
+                geometry = new THREE.RingGeometry( 0.02, 0.04, 32 ).translate( 0, 0, - 1 );
+                material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true } );
+                controller.add( new THREE.Mesh( geometry, material ) )
+
+        }
     }
 
     buildControllers(){
