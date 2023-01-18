@@ -22,7 +22,7 @@ export class App{
     workingMatrix : THREE.Matrix4;
     workingVector : THREE.Vector3;
     controllers: THREE.XRTargetRaySpace[];
-    controller: any;
+    controllerFlashLight: any;
     highlight: THREE.Mesh;
     children: any;
     userData:any;
@@ -119,6 +119,8 @@ export class App{
                 { 
                     color: 0xffffff, 
                     side: THREE.BackSide 
+                    // side: THREE.FrontSide
+                    // side: THREE.BothSide
                 } 
             ) 
         );
@@ -131,39 +133,48 @@ export class App{
         document.body.appendChild(VRButton.createButton(this.renderer));
         // const button = new VRButton( this.renderer );
 
-        // this.controllers = this.buildControllers();
-
+        this.controllers = this.buildControllers();
         const onSelectStart = () => {
             this.children[0].scale.z = 10; // 10 = 10 meters
             this.userData.selectPressed = true;
-            if (this.spotlight) this.spotlight.visible = true;
         }
-
         const onSelectEnd = () => {
             this.children[0].scale.z = 0;
             this.highlight.visible = false;
             this.userData.selectPressed = false;
+        }
+        this.controllers.forEach((controller:any) => {
+            controller.addEventListener( 'selectstart', onSelectStart );
+            controller.addEventListener( 'selectend', onSelectEnd );
+        })
+
+        const onSelectStartFlashLight = () => {
+            this.userData.selectPressed = true;
+            if (this.spotlight) this.spotlight.visible = true;
+        }
+        const onSelectEndFlashLight = () => {
+            this.highlight.visible = false;
+            this.userData.selectPressed = false;
             if (this.spotlight) this.spotlight.visible = false; 
         }
-
-        this.controller = this.renderer.xr.getController( 0 );
-        this.controller.addEventListener( 'selectstart', onSelectStart );
-        this.controller.addEventListener( 'selectend', onSelectEnd );
-        this.controller.addEventListener( 'connected', (event:any)=> {
-            this.buildCustomController.call(self, event.data, this );
+        this.controllerFlashLight = this.renderer.xr.getController( 0 );
+        this.controllerFlashLight.addEventListener( 'selectstart', onSelectStartFlashLight );
+        this.controllerFlashLight.addEventListener( 'selectend', onSelectEndFlashLight );
+        this.controllerFlashLight.addEventListener( 'connected', (event:any)=> {
+            this.buildFlashLightController.call(self, event.data, this );
         } );
 
-        this.controller.addEventListener( 'disconnected', () => {
+        this.controllerFlashLight.addEventListener( 'disconnected', () => {
             // while(this.children.length>0) this.remove(this.children[0]);
-            this.controller = null;
+            this.controllerFlashLight = null;
 
         } );
-        this.scene.add( this.controller );
+        this.scene.add( this.controllerFlashLight );
  
         this.scene.add(this.highlight);
     }
 
-    buildCustomController(data:any, controller:any){
+    buildFlashLightController(data:any, controller:any){
         let geometry, material, loader;        
         switch ( data.targetRayMode ) {
             
@@ -259,6 +270,23 @@ export class App{
         }
     }
     
+    handleFlasLightController( controller:any ){
+        if (controller.userData.selectPressed ){
+            this.workingMatrix.identity().extractRotation( controller.matrixWorld );
+
+            this.raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
+            this.raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( this.workingMatrix );
+
+            const intersects = this.raycaster.intersectObjects( this.room.children );
+
+            if (intersects.length>0){
+                intersects[0].object.add(this.highlight);
+                this.highlight.visible = true;
+            }else{
+                this.highlight.visible = false;
+            }
+        }
+    }
 
     resize(){
         this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -268,7 +296,6 @@ export class App{
     
 	render( ) {   
         this.mesh.rotateY( 0.01 );
-        this.renderer.render( this.scene, this.camera );
         this.stats.update();
         
         if (this.controllers ){
@@ -277,7 +304,8 @@ export class App{
                 self.handleController( controller ) 
             });
         }
-        
+        if (this.controllerFlashLight ) this.handleController( this.controllerFlashLight );
+        this.renderer.render( this.scene, this.camera );
     }
 
     remove(){}
