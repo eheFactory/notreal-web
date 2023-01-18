@@ -3,10 +3,11 @@
  * @author Mugen87 / https://github.com/Mugen87
  * @author NikLever / http://niklever.com
  */
+import * as THREE from 'three'
 
 class VRButton{
-    renderer:any;
-	constructor( renderer:any ) {
+    renderer: THREE.WebGLRenderer;
+	constructor( renderer: THREE.WebGLRenderer ) {
         this.renderer = renderer;
         
         if ( 'xr' in navigator ) {
@@ -24,8 +25,8 @@ class VRButton{
 		} else {
             const message = document.createElement('a');
             if(window.isSecureContext === false){
-                // message.href = document.location.href.replace(/^http:/, 'https');
-                message.href = document.location.href.replace('/^http:/', 'https');
+                message.href = document.location.href.replace(/^http:/, 'https');
+                // message.href = document.location.href.replace('/^http:/', 'https');
                 message.innerHTML = 'WEBXR NEEDS HTTPS';
             }else{
                 message.href = 'https://immersiveweb.dev';
@@ -79,18 +80,21 @@ class VRButton{
             button.style.fontSize ='12px';
             button.textContent = (currentSession===null) ? 'ENTER VR' : 'EXIT VR';
             button.style.opacity = '1.0';
+            console.log("enter");
         }
         
         button.onmouseleave = () => {
             button.style.fontSize ='30px';
             button.innerHTML = '<i class="fas fa-vr-cardboard"></i>';
             button.style.opacity = '0.5';
+            console.log("leave");
         }
 
 
 
 
         button.onclick(()=>{
+            console.log("clieck");
             if(currentSession===null){
                 // WebXR's requestReferenceSpace only works if the corresponding feature
                 // was requested at session creation time. For simplicity, just ask for
