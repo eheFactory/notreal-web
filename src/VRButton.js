@@ -6,8 +6,7 @@
 import * as THREE from 'three'
 
 class VRButton{
-    renderer: THREE.WebGLRenderer;
-	constructor( renderer: THREE.WebGLRenderer ) {
+	constructor( renderer) {
         this.renderer = renderer;
         
         if ( 'xr' in navigator ) {
@@ -46,12 +45,12 @@ class VRButton{
 
     }
 
-	showEnterVR( button:any ) {
-        let currentSession:any = null;
+	showEnterVR( button ) {
+        let currentSession = null;
         this.stylizeElement(button, true, 30, true);
 
 
-        const onSessionStarted = (session:any) => {
+        const onSessionStarted = (session) => {
             session.addEventListener('end', onSessionEnded);
             this.renderer.xr.setSession(session);
 
@@ -112,7 +111,7 @@ class VRButton{
         })
     }
 
-    disableButton( button:any ) {
+    disableButton( button ) {
 
         button.style.cursor = 'auto';
         button.style.opacity = '0.5';
@@ -124,7 +123,7 @@ class VRButton{
 
     }
 
-    showWebXRNotFound( button:any ) { 
+    showWebXRNotFound( button ) { 
         this.stylizeElement(button, false);
 
         this.disableButton(button);
@@ -140,7 +139,7 @@ class VRButton{
     
     }
 
-    stylizeElement( element:any, green = true, fontSize = 13, ignorePadding = false ) {
+    stylizeElement( element, green = true, fontSize = 13, ignorePadding = false ) {
 
         element.style.position = 'absolute';
         element.style.bottom = '20px';

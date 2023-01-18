@@ -9,28 +9,8 @@ import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 // import { VRButton } from './VRButton';
 
 export class App{
-    camera: THREE.PerspectiveCamera;
-    scene: THREE.Scene;
-    renderer: THREE.WebGLRenderer;
-    mesh: THREE.Mesh;
-    clock: THREE.Clock;
-    controls: OrbitControls;
-    stats: Stats;
-    radius: number;
-    room: THREE.LineSegments;    
-    raycaster : THREE.Raycaster;
-    workingMatrix : THREE.Matrix4;
-    workingVector : THREE.Vector3;
-    controllers: THREE.XRTargetRaySpace[];
-
-    // uncommetn for custom controller
-    // controllerFlashLight: any;
-    
-    highlight: THREE.Mesh;
-    children: any;
-    userData:any;
-    spotlight: THREE.Group;
 	constructor(){
+        console.log("asdasdasdds")
 		const container = document.createElement( 'div' );
 		document.body.appendChild( container );
 
@@ -85,7 +65,7 @@ export class App{
         this.renderer.setAnimationLoop(this.render.bind(this));
 	}	
     
-    random( min:number, max:number): number {
+    random(min, max){
         return Math.random() * (max-min) + min;
     }
 
@@ -146,7 +126,7 @@ export class App{
             this.highlight.visible = false;
             this.userData.selectPressed = false;
         }
-        this.controllers.forEach((controller:any) => {
+        this.controllers.forEach((controller) => {
             controller.addEventListener( 'selectstart', onSelectStart );
             controller.addEventListener( 'selectend', onSelectEnd );
         })
@@ -254,7 +234,7 @@ export class App{
         return controllers;
     }
     
-    handleController( controller:any ){
+    handleController( controller){
         if (controller.userData.selectPressed ){
             controller.children[0].scale.z = 10;
 
@@ -320,7 +300,8 @@ export class App{
     remove(){}
 }
 
+
 document.addEventListener("DOMContentLoaded", function () {
     const app = new App();
-    (window as any).app = app;
+    window.app = app;
 });
