@@ -131,8 +131,7 @@ export class App{
         document.body.appendChild(VRButton.createButton(this.renderer));
         // const button = new VRButton( this.renderer );
 
-        this.controllers = this.buildControllers();
-        // this.controllers = this.buildCustomController();
+        // this.controllers = this.buildControllers();
 
         const onSelectStart = () => {
             this.children[0].scale.z = 10; // 10 = 10 meters
