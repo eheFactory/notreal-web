@@ -22,6 +22,7 @@ export class App{
     workingMatrix : THREE.Matrix4;
     workingVector : THREE.Vector3;
     controllers: THREE.XRTargetRaySpace[];
+    controller: any;
     highlight: THREE.Mesh;
     children: any;
     userData:any;
@@ -77,9 +78,8 @@ export class App{
         this.initScene();
         this.setupXR();
         
-        this.renderer.setAnimationLoop(this.render.bind(this));
-
         window.addEventListener('resize', this.resize.bind(this) );
+        this.renderer.setAnimationLoop(this.render.bind(this));
 	}	
     
     random( min:number, max:number): number {
@@ -123,7 +123,7 @@ export class App{
             ) 
         );
         this.highlight.scale.set(1.2, 1.2, 1.2);
-        this.scene.add(this.highlight);
+        // this.scene.add(this.highlight);
     }
     
     setupXR(){
@@ -132,32 +132,40 @@ export class App{
         // const button = new VRButton( this.renderer );
 
         this.controllers = this.buildControllers();
+        // this.controllers = this.buildCustomController();
 
         const onSelectStart = () => {
-            
             this.children[0].scale.z = 10; // 10 = 10 meters
             this.userData.selectPressed = true;
+            if (this.spotlight) this.spotlight.visible = true;
         }
 
         const onSelectEnd = () => {
-
             this.children[0].scale.z = 0;
             this.highlight.visible = false;
             this.userData.selectPressed = false;
-            
+            if (this.spotlight) this.spotlight.visible = false; 
         }
-        
-        this.controllers.forEach( (controller) => {
-            controller.addEventListener( 'selectstart', onSelectStart );
-            controller.addEventListener( 'selectend', onSelectEnd );
-        });
+
+        this.controller = this.renderer.xr.getController( 0 );
+        this.controller.addEventListener( 'selectstart', onSelectStart );
+        this.controller.addEventListener( 'selectend', onSelectEnd );
+        this.controller.addEventListener( 'connected', (event:any)=> {
+            this.buildCustomController.call(self, event.data, this );
+        } );
+
+        this.controller.addEventListener( 'disconnected', () => {
+            // while(this.children.length>0) this.remove(this.children[0]);
+            this.controller = null;
+
+        } );
+        this.scene.add( this.controller );
+ 
+        this.scene.add(this.highlight);
     }
 
     buildCustomController(data:any, controller:any){
-        let geometry, material, loader;
-        
-        const self = this;
-        
+        let geometry, material, loader;        
         switch ( data.targetRayMode ) {
             
             case 'tracked-pointer':
@@ -180,12 +188,12 @@ export class App{
                     
                         spotlight.position.set(0,0,0);
                         spotlight.target.position.set(0,0,-1);
-                        self.spotlight.add( spotlight.target );
-                        self.spotlight.add( spotlight );
-                        self.spotlight.add( cone );
+                        this.spotlight.add( spotlight.target );
+                        this.spotlight.add( spotlight );
+                        this.spotlight.add( cone );
                         
-                        controller.add(self.spotlight);
-                        self.spotlight.visible = false;
+                        controller.add(this.spotlight);
+                        this.spotlight.visible = false;
                     },
                     undefined,
                     (error) =>  {
@@ -272,6 +280,8 @@ export class App{
         }
         
     }
+
+    remove(){}
 }
 
 document.addEventListener("DOMContentLoaded", function () {
