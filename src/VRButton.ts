@@ -92,7 +92,6 @@ class VRButton{
 
 
 
-
         button.onclick(()=>{
             console.log("clieck");
             if(currentSession===null){
