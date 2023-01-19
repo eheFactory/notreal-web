@@ -134,7 +134,7 @@ class App{
             
             case 'tracked-pointer':
 
-                loader = new GLTFLoader().setPath('../../assets/');
+                loader = new GLTFLoader().setPath('./assets/');
         
                 loader.load( 'flash-light.glb',
                     ( gltf ) => {
