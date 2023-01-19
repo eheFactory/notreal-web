@@ -4,9 +4,9 @@ import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerM
 import Stats from 'three/examples/jsm/libs/stats.module'
 import {BoxLineGeometry} from 'three/examples/jsm/geometries/BoxLineGeometry.js'
 import { GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
-import { SpotLightVolumetricMaterial } from './SpotLightVolumetricMaterial';
+import { SpotLightVolumetricMaterial } from './libs/SpotLightVolumetricMaterial';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
-// import { VRButton } from './VRButton';
+// import { VRButton } from './libs/VRButton';
 
 export class App{
 	constructor(){
