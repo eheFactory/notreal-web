@@ -92,7 +92,7 @@ class App{
         
         const self = this;
         
-        this.controllers = this.buildControllers();
+        // this.controllers = this.buildControllers();
         
         function onSelectStart() {
             
