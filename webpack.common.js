@@ -7,19 +7,6 @@ module.exports = {
             {
                 exclude: /node_modules/,
             },
-            {
-                test: /\.(glb|gltf)$/,
-                include: path.resolve(__dirname, './src/assets'),
-                use: [
-                 {
-                  loader: 'file-loader',
-                  options: {
-                   outputPath: 'assets/',
-                   sourceMap: true
-                  }
-                }
-            ]
-            },
         ],
     },
     resolve: {
@@ -28,10 +15,5 @@ module.exports = {
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, './'),
-    },
-    plugins: [
-        new CopyWebpackPlugin({
-         patterns: [{ from: './src/assets', to:'./assets' }]
-        })
-    ]
+    }
 }

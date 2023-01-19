@@ -21,7 +21,7 @@ export class App{
 		this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color( 0xaaaaaa );
 
-        const ambient = this.scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
+        const ambient = new THREE.HemisphereLight( 0x606060, 0x404040 );
 		// const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 0.3);
 		this.scene.add(ambient);
         
