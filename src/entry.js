@@ -125,10 +125,10 @@ export class App{
             this.highlight.visible = false;
             this.userData.selectPressed = false;
         }
-        this.controllers.forEach((controller) => {
-            controller.addEventListener( 'selectstart', onSelectStart );
-            controller.addEventListener( 'selectend', onSelectEnd );
-        });
+        // this.controllers.forEach((controller) => {
+            // controller.addEventListener( 'selectstart', onSelectStart );
+            // controller.addEventListener( 'selectend', onSelectEnd );
+        // });
     }
     
     buildControllers() {
@@ -190,10 +190,11 @@ export class App{
         this.stats.update();
         
         if (this.controllers ){
-            const self = this;
-            this.controllers.forEach( ( controller) => { 
-                self.handleController( controller ) 
-            });
+            // const self = this;
+            // this.controllers.forEach( ( controller) => { 
+            //     self.handleController( controller ) 
+            // });
+            console.log("render");
         }
 
         this.renderer.render( this.scene, this.camera );
