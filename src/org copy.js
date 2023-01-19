@@ -10,7 +10,6 @@ import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
 export class App{
 	constructor(){
-        console.log("asdasdasdds")
 		const container = document.createElement( 'div' );
 		document.body.appendChild( container );
 
@@ -22,13 +21,13 @@ export class App{
 		this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color( 0xaaaaaa );
 
-        // const ambient = this.scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
-		const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 0.3);
+        const ambient = this.scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
+		// const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 0.3);
 		this.scene.add(ambient);
         
         const light = new THREE.DirectionalLight();
-        light.position.set( 0.2, 1, 1);
-        // light.position.set( 1, 1, 1 ).normalize();
+        // light.position.set( 0.2, 1, 1);
+        light.position.set( 1, 1, 1 ).normalize();
 		this.scene.add( light );
 			
 		// this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true } );
@@ -43,7 +42,7 @@ export class App{
         this.controls.target.set(0, 1.6, 0);
         this.controls.update();
 
-        this.stats = Stats();
+        this.stats = new Stats();
         container.appendChild( this.stats.dom );
 
         //Replace Box with Circle, Cone, Cylinder, Dodecahedron, Icosahedron, Octahedron, Plane, Sphere, Tetrahedron, Torus or TorusKnot
@@ -85,7 +84,7 @@ export class App{
             const object = new THREE.Mesh(
                 geometry,
                 new THREE.MeshLambertMaterial(
-                    {color: Math.random() * 0xFFFFF}
+                    {color: Math.random() * 0xffffff}
                 )  
             );
 
