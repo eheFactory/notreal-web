@@ -192,10 +192,10 @@ export class App{
                 info.name = profile.profileId;
                 info.targetRayMode = event.data.targetRayMode;
 
-                Objects.entries(profile.layouts).forEach(( [key, layout] ) => {
+                Object.entries(profile.layouts).forEach(( [key, layout] ) => {
                     const components = {};
                     Object.values(layout.components).forEach((component) => {
-                        components[component.rootNodeName] = component.this.gamepadIndices;
+                        components[component.rootNodeName] = component.gamepadIndices;
                     });
                     info[key] = components;
                 });
