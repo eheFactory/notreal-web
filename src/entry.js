@@ -15,87 +15,101 @@ import {
 } from 'three/examples/jsm/libs/motion-controllers.module.js';
 import { BufferGeometry } from 'three';
 
-
 const DEFAULT_PROFILES_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles';
 const DEFAULT_PROFILE = 'generic-trigger';
 
-class App{
+export class App{
 	constructor(){
 		const container = document.createElement( 'div' );
 		document.body.appendChild( container );
-        
+
         this.clock = new THREE.Clock();
         
-		this.camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
+		this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 100 );
 		this.camera.position.set( 0, 1.6, 3 );
         
 		this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color( 0x505050 );
 
-		this.scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
-
-        const light = new THREE.DirectionalLight( 0xffffff );
+        const ambient = new THREE.HemisphereLight( 0x606060, 0x404040 );
+		// const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 0.3);
+		this.scene.add(ambient);
+        
+        const light = new THREE.DirectionalLight();
+        // light.position.set( 0.2, 1, 1);
         light.position.set( 1, 1, 1 ).normalize();
 		this.scene.add( light );
 			
+		// this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true } );
 		this.renderer = new THREE.WebGLRenderer({ antialias: true } );
 		this.renderer.setPixelRatio( window.devicePixelRatio );
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
         this.renderer.outputEncoding = THREE.sRGBEncoding;
-        
+
 		container.appendChild( this.renderer.domElement );
-        
+		
         this.controls = new OrbitControls( this.camera, this.renderer.domElement );
         this.controls.target.set(0, 1.6, 0);
         this.controls.update();
-        
+
         this.stats = new Stats();
-        document.body.appendChild( this.stats.dom );
-        
+        container.appendChild( this.stats.dom );
+
+        //Replace Box with Circle, Cone, Cylinder, Dodecahedron, Icosahedron, Octahedron, Plane, Sphere, Tetrahedron, Torus or TorusKnot
+        const geometry = new THREE.BoxGeometry(); 
+        const material = new THREE.MeshStandardMaterial( { color: 0xFF0000 });
+        this.mesh = new THREE.Mesh( geometry, material );
+        this.scene.add(this.mesh);
+
+                
         this.raycaster = new THREE.Raycaster();
         this.workingMatrix = new THREE.Matrix4();
         this.workingVector = new THREE.Vector3();
         
+
         this.initScene();
         this.setupXR();
         
         window.addEventListener('resize', this.resize.bind(this) );
-        
-        this.renderer.setAnimationLoop( this.render.bind(this) );
+        this.renderer.setAnimationLoop(this.render.bind(this));
 	}	
     
-    random( min, max ){
+    random(min, max){
         return Math.random() * (max-min) + min;
     }
-    
+
     initScene(){
         this.radius = 0.08;
-        
         this.room = new THREE.LineSegments(
-					new BoxLineGeometry( 6, 6, 6, 10, 10, 10 ),
-					new THREE.LineBasicMaterial( { color: 0x808080 } )
-				);
-        this.room.geometry.translate( 0, 3, 0 );
-        this.scene.add( this.room );
-        
-        const geometry = new THREE.IcosahedronBufferGeometry( this.radius, 2 );
+            // new THREE.BoxGeometry(6,6,6,10,10,10),
+            new BoxLineGeometry(6,6,6,10,10,10),
+            new THREE.LineBasicMaterial({color:0x808080})
+        );
+        this.room.geometry.translate(0, 3, 0);
+        this.scene.add(this.room);
 
-        for ( let i = 0; i < 200; i ++ ) {
+        const geometry = new THREE.IcosahedronGeometry(this.radius, 2);
 
-            const object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+        for(let i=0; i<200; i++){
+            const object = new THREE.Mesh(
+                geometry,
+                new THREE.MeshLambertMaterial(
+                    {color: Math.random() * 0xffffff}
+                )  
+            );
 
-            object.position.x = this.random( -2, 2 );
-            object.position.y = this.random( -2, 2 );
-            object.position.z = this.random( -2, 2 );
+            object.position.x = this.random(-2, 2);
+            object.position.y = this.random(-2, 2);
+            object.position.z = this.random(-2, 2);
 
-            this.room.add( object );
-
+            this.room.add(object);
         }
-        
+
+                                                                                                    // side: THREE.FrontSide
+                                                                                                    // side: THREE.BothSide
         this.highlight = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.BackSide } ) );
         this.highlight.scale.set(1.2, 1.2, 1.2);
         this.scene.add(this.highlight);
-        
         this.ui = this.createUI();
     }
     
@@ -110,7 +124,7 @@ class App{
         this.scene.add( ui.mesh );
         return ui;
     }
-    
+
     //{"trigger":{"button":0},"touchpad":{"button":2,"xAxis":0,"yAxis":1}},"squeeze":{"button":1},"thumbstick":{"button":3,"xAxis":2,"yAxis":3},"button":{"button":6}}}
     createButtonStates(components){
 
@@ -136,7 +150,7 @@ class App{
             this.strStates = str;
         }
     }
-    
+
     updateGamepadState(){
         const session = this.renderer.xr.getSession();
         
@@ -164,59 +178,51 @@ class App{
             }
         }
     }
-    
+
     setupXR(){
         this.renderer.xr.enabled = true;
-        
-        // const button = new VRButton( this.renderer );
         document.body.appendChild(VRButton.createButton(this.renderer));
 
-        const self = this;
-        
-        function onConnected( event ){
-            const info = {};
-            
-            fetchProfile( event.data, DEFAULT_PROFILES_PATH, DEFAULT_PROFILE ).then( ( { profile, assetPath } ) => {
+        const onConnected = (event) => {
+            const info = {}
+
+            fetchProfile(event.data, DEFAULT_PROFILES_PATH, DEFAULT_PROFILE).then(({profile, assetPath}) => {
                 console.log( JSON.stringify(profile));
-                
+
                 info.name = profile.profileId;
                 info.targetRayMode = event.data.targetRayMode;
 
-                Object.entries( profile.layouts ).forEach( ( [key, layout] ) => {
+                Objects.entries(profile.layouts).forEach(( [key, layout] ) => {
                     const components = {};
-                    Object.values( layout.components ).forEach( ( component ) => {
-                        components[component.rootNodeName] = component.gamepadIndices;
+                    Object.values(layout.components).forEach((component) => {
+                        components[component.rootNodeName] = component.this.gamepadIndices;
                     });
                     info[key] = components;
                 });
-
-                self.createButtonStates( info.right );
-                
-                console.log( JSON.stringify(info) );
-
-                self.updateControllers( info );
-
-            } );
+                this.createButtonStates(info.riht);
+                console.log(JSON.stringify(info));
+                this.updateControllers(info);
+            });
         }
-         
-        const controller = this.renderer.xr.getController( 0 );
-        
-        controller.addEventListener( 'connected', onConnected );
-        
+        const controller = this.renderer.xr.getController(0);
+        controller.addEventListener('connected', onConnected);
         const modelFactory = new XRControllerModelFactory();
-        
-        const geometry = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0,0,0 ), new THREE.Vector3( 0,0,-1 ) ] );
+        const geometry = new THREE.BufferGeometry().setFromPoints(
+            [
+                new THREE.Vector3(0,0,0),
+                new THREE.Vector3(0,0,-1)
+            ]
+        );
 
-        const line = new THREE.Line( geometry );
+        const line = new THREE.Line(geometry);
         line.scale.z = 0;
-        
-        this.controllers = {};
-        this.controllers.right = this.buildController( 0, line, modelFactory );
-        this.controllers.left = this.buildController( 1, line, modelFactory );
 
+        this.controllers = {};
+        this.controllers.right = this.buildController(0, line, modelFactory);
+        this.controllers.left = this.buildController(1, line, modelFactory);
     }
     
-    buildController( index, line, modelFactory ){
+    buildController(index, line, modelFactory){
         const controller = this.renderer.xr.getController( index );
         
         controller.userData.selectPressed = false;
@@ -238,48 +244,40 @@ class App{
     }
     
     updateControllers(info){
-        const self = this;
-        
-        function onSelectStart( ){
+        const onSelectStart = () => {
             this.userData.selectPressed = true;
         }
-
-        function onSelectEnd( ){
+        const onSelectEnd = () => {
             this.children[0].scale.z = 0;
             this.userData.selectPressed = false;
             this.userData.selected = undefined;
         }
-
-        function onSqueezeStart( ){
+        const onSqueezeStart = () => {
             this.userData.squeezePressed = true;
             if (this.userData.selected !== undefined ){
                 this.attach( this.userData.selected );
                 this.userData.attachedObject = this.userData.selected;
             }
         }
-
-        function onSqueezeEnd( ){
+        const onSqueezeEnd = () => {
             this.userData.squeezePressed = false;
             if (this.userData.attachedObject !== undefined){
-                self.room.attach( this.userData.attachedObject );
+                this.room.attach( this.userData.attachedObject );
                 this.userData.attachedObject = undefined;
             }
         }
-        
-        function onDisconnected(){
+        const onDisconnected = () => {
             const index = this.userData.index;
             console.log(`Disconnected controller ${index}`);
-            
-            if ( self.controllers ){
-                const obj = (index==0) ? self.controllers.right : self.controllers.left;
-                
+            if ( this.controllers ){
+                const obj = (index==0) ? this.controllers.right : this.controllers.left;
                 if (obj){
                     if (obj.controller){
                         const controller = obj.controller;
                         while( controller.children.length > 0 ) controller.remove( controller.children[0] );
-                        self.scene.remove( controller );
+                        this.scene.remove( controller );
                     }
-                    if (obj.grip) self.scene.remove( obj.grip );
+                    if (obj.grip) this.scene.remove( obj.grip );
                 }
             }
         }
@@ -290,29 +288,25 @@ class App{
             let trigger = false, squeeze = false;
             
             Object.keys( info.right ).forEach( (key) => {
-                if (key.indexOf('trigger')!=-1) trigger = true;                   if (key.indexOf('squeeze')!=-1) squeeze = true;      
+                if (key.indexOf('trigger')!=-1) trigger = true;                   
+                if (key.indexOf('squeeze')!=-1) squeeze = true;      
             });
-            
             if (trigger){
                 right.addEventListener( 'selectstart', onSelectStart );
                 right.addEventListener( 'selectend', onSelectEnd );
             }
-
             if (squeeze){
                 right.addEventListener( 'squeezestart', onSqueezeStart );
                 right.addEventListener( 'squeezeend', onSqueezeEnd );
             }
-            
             right.addEventListener( 'disconnected', onDisconnected );
         }
-        
         if (info.left !== undefined){
-            const left = this.renderer.xr.getController(1);
-            
+            const left = this.renderer.xr.getController(1);   
             let trigger = false, squeeze = false;
-            
             Object.keys( info.left ).forEach( (key) => {
-                if (key.indexOf('trigger')!=-1) trigger = true;                   if (key.indexOf('squeeze')!=-1) squeeze = true;      
+                if (key.indexOf('trigger')!=-1) trigger = true;                   
+                if (key.indexOf('squeeze')!=-1) squeeze = true;      
             });
             
             if (trigger){
@@ -328,8 +322,8 @@ class App{
             left.addEventListener( 'disconnected', onDisconnected );
         }
     }
-    
-    handleController( controller ){
+
+    handleController( controller){
         if (controller.userData.selectPressed ){
             controller.children[0].scale.z = 10;
 
@@ -350,7 +344,7 @@ class App{
             }
         }
     }
-    
+
     resize(){
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
@@ -359,25 +353,28 @@ class App{
     
 	render( ) {   
         const dt = this.clock.getDelta();
+        this.mesh.rotateY( 0.01 );
         
-        if (this.renderer.xr.isPresenting){
-            const self = this; 
-            if (this.controllers ){
-                Object.values( this.controllers).forEach( ( value ) => {
-                    self.handleController( value.controller );
+        if(this.renderer.xr.isPresenting){
+            if(this.controllers){
+                Object.values(this.controllers).forEach((value) => {
+                    this.handleController(value.controller);
                 });
-            } 
-            if (this.elapsedTime===undefined) this.elapsedTime = 0;
+            }
+            if(this.elapsedTime === undefined) this.elapsedTime = 0;
             this.elapsedTime += dt;
-            if (this.elapsedTime > 0.3){
+            if(this.elapsedTime > 0.3){
                 this.updateGamepadState();
                 this.elapsedTime = 0;
             }
         }else{
             this.stats.update();
         }
+
         this.renderer.render( this.scene, this.camera );
     }
+
+    remove(){}
 }
 
 document.addEventListener("DOMContentLoaded", function () {

@@ -11,6 +11,24 @@ import {
 	MotionController
 } from '../../libs/three/jsm/motion-controllers.module.js';
 
+import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory';
+import Stats from 'three/examples/jsm/libs/stats.module'
+import {BoxLineGeometry} from 'three/examples/jsm/geometries/BoxLineGeometry.js'
+import { GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+import { SpotLightVolumetricMaterial } from './libs/SpotLightVolumetricMaterial';
+import {CanvasUI} from './libs/CanvasUI';
+// import { VRButton } from './libs/VRButton';
+import {
+	Constants as MotionControllerConstants,
+	fetchProfile,
+	MotionController
+} from 'three/examples/jsm/libs/motion-controllers.module.js';
+import { BufferGeometry } from 'three';
+
+
 const DEFAULT_PROFILES_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles';
 const DEFAULT_PROFILE = 'generic-trigger';
 
@@ -163,7 +181,8 @@ class App{
     setupXR(){
         this.renderer.xr.enabled = true;
         
-        const button = new VRButton( this.renderer );
+        // const button = new VRButton( this.renderer );
+        document.body.appendChild(VRButton.createButton(this.renderer));
 
         const self = this;
         
@@ -373,5 +392,10 @@ class App{
         this.renderer.render( this.scene, this.camera );
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const app = new App();
+    window.app = app;
+});
 
 export { App };
