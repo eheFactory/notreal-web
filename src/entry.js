@@ -4,10 +4,10 @@ import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerM
 import Stats from 'three/examples/jsm/libs/stats.module'
 import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { SpotLightVolumetricMaterial } from './libs/SpotLightVolumetricMaterial';
 import { CanvasUI } from './libs/CanvasUI';
-// import { VRButton } from './libs/VRButton';
+// import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+import { VRButton } from './libs/VRButton';
 import {
     Constants as MotionControllerConstants,
     fetchProfile,
@@ -176,7 +176,9 @@ export class App {
 
     setupXR() {
         this.renderer.xr.enabled = true;
-        document.body.appendChild(VRButton.createButton(this.renderer));
+        // document.body.appendChild(VRButton.createButton(this.renderer));
+        const button = new VRButton( this.renderer );
+
 
         const onConnected = (event) => {
             const info = {}
