@@ -31,12 +31,16 @@ class App {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x505050);
 
-        this.scene.add(new THREE.HemisphereLight(0x606060, 0x404040));
+        const ambient = new THREE.HemisphereLight(0x606060, 0x404040);
+        // const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 0.3);
+        this.scene.add(ambient);
 
         const light = new THREE.DirectionalLight(0xffffff);
+        // light.position.set( 0.2, 1, 1);
         light.position.set(1, 1, 1).normalize();
         this.scene.add(light);
 
+        // this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true } );
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -49,17 +53,24 @@ class App {
         this.controls.update();
 
         this.stats = new Stats();
-        document.body.appendChild(this.stats.dom);
+        container.appendChild(this.stats.dom);
+
+        //Replace Box with Circle, Cone, Cylinder, Dodecahedron, Icosahedron, Octahedron, Plane, Sphere, Tetrahedron, Torus or TorusKnot
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.scene.add(this.mesh);
+
 
         this.raycaster = new THREE.Raycaster();
         this.workingMatrix = new THREE.Matrix4();
         this.workingVector = new THREE.Vector3();
 
+
         this.initScene();
         this.setupXR();
 
         window.addEventListener('resize', this.resize.bind(this));
-
         this.renderer.setAnimationLoop(this.render.bind(this));
     }
 
@@ -71,6 +82,7 @@ class App {
         this.radius = 0.08;
 
         this.room = new THREE.LineSegments(
+            // new THREE.BoxGeometry(6,6,6,10,10,10),
             new BoxLineGeometry(6, 6, 6, 10, 10, 10),
             new THREE.LineBasicMaterial({ color: 0x808080 })
         );
@@ -91,6 +103,8 @@ class App {
 
         }
 
+        // side: THREE.FrontSide
+        // side: THREE.BothSide
         this.highlight = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.BackSide }));
         this.highlight.scale.set(1.2, 1.2, 1.2);
         this.scene.add(this.highlight);
@@ -166,12 +180,11 @@ class App {
 
     setupXR() {
         this.renderer.xr.enabled = true;
-
+        // document.body.appendChild(VRButton.createButton(this.renderer));
         const button = new VRButton(this.renderer);
 
-        const self = this;
 
-        function onConnected(event) {
+        const onConnected = (event) => {
             const info = {};
 
             fetchProfile(event.data, DEFAULT_PROFILES_PATH, DEFAULT_PROFILE).then(({ profile, assetPath }) => {
@@ -188,11 +201,11 @@ class App {
                     info[key] = components;
                 });
 
-                self.createButtonStates(info.right);
+                this.createButtonStates(info.right);
 
                 console.log(JSON.stringify(info));
 
-                self.updateControllers(info);
+                this.updateControllers(info);
 
             });
         }
@@ -236,48 +249,47 @@ class App {
     }
 
     updateControllers(info) {
-        const self = this;
 
-        function onSelectStart() {
+        const onSelectStart = () => {
             this.userData.selectPressed = true;
         }
+        const onSelectEnd = () => {
 
-        function onSelectEnd() {
             this.children[0].scale.z = 0;
             this.userData.selectPressed = false;
             this.userData.selected = undefined;
         }
+        const onSqueezeStart = () => {
 
-        function onSqueezeStart() {
             this.userData.squeezePressed = true;
             if (this.userData.selected !== undefined) {
                 this.attach(this.userData.selected);
                 this.userData.attachedObject = this.userData.selected;
             }
         }
+        const onSqueezeEnd = () => {
 
-        function onSqueezeEnd() {
             this.userData.squeezePressed = false;
             if (this.userData.attachedObject !== undefined) {
-                self.room.attach(this.userData.attachedObject);
+                this.room.attach(this.userData.attachedObject);
                 this.userData.attachedObject = undefined;
             }
         }
+        const onDisconnected = () => {
 
-        function onDisconnected() {
             const index = this.userData.index;
             console.log(`Disconnected controller ${index}`);
 
-            if (self.controllers) {
-                const obj = (index == 0) ? self.controllers.right : self.controllers.left;
+            if (this.controllers) {
+                const obj = (index == 0) ? this.controllers.right : this.controllers.left;
 
                 if (obj) {
                     if (obj.controller) {
                         const controller = obj.controller;
                         while (controller.children.length > 0) controller.remove(controller.children[0]);
-                        self.scene.remove(controller);
+                        this.scene.remove(controller);
                     }
-                    if (obj.grip) self.scene.remove(obj.grip);
+                    if (obj.grip) this.scene.remove(obj.grip);
                 }
             }
         }
@@ -357,12 +369,12 @@ class App {
 
     render() {
         const dt = this.clock.getDelta();
+        this.mesh.rotateY(0.01);
 
         if (this.renderer.xr.isPresenting) {
-            const self = this;
             if (this.controllers) {
                 Object.values(this.controllers).forEach((value) => {
-                    self.handleController(value.controller);
+                    this.handleController(value.controller);
                 });
             }
             if (this.elapsedTime === undefined) this.elapsedTime = 0;
@@ -376,6 +388,7 @@ class App {
         }
         this.renderer.render(this.scene, this.camera);
     }
+    remove() { }
 }
 
 
