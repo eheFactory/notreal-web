@@ -184,7 +184,7 @@ class App {
         const button = new VRButton(this.renderer);
 
 
-        const onConnected = (event) => {
+        function onConnected (event) {
             const info = {};
 
             fetchProfile(event.data, DEFAULT_PROFILES_PATH, DEFAULT_PROFILE).then(({ profile, assetPath }) => {
@@ -250,16 +250,16 @@ class App {
 
     updateControllers(info) {
 
-        const onSelectStart = () => {
+        function onSelectStart () {
             this.userData.selectPressed = true;
         }
-        const onSelectEnd = () => {
+        function onSelectEnd () {
 
             this.children[0].scale.z = 0;
             this.userData.selectPressed = false;
             this.userData.selected = undefined;
         }
-        const onSqueezeStart = () => {
+        function onSqueezeStart () {
 
             this.userData.squeezePressed = true;
             if (this.userData.selected !== undefined) {
@@ -267,7 +267,7 @@ class App {
                 this.userData.attachedObject = this.userData.selected;
             }
         }
-        const onSqueezeEnd = () => {
+        function onSqueezeEnd () {
 
             this.userData.squeezePressed = false;
             if (this.userData.attachedObject !== undefined) {
@@ -275,7 +275,7 @@ class App {
                 this.userData.attachedObject = undefined;
             }
         }
-        const onDisconnected = () => {
+        function onDisconnected () {
 
             const index = this.userData.index;
             console.log(`Disconnected controller ${index}`);
