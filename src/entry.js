@@ -55,11 +55,11 @@ class App {
         this.stats = new Stats();
         container.appendChild(this.stats.dom);
 
-        //Replace Box with Circle, Cone, Cylinder, Dodecahedron, Icosahedron, Octahedron, Plane, Sphere, Tetrahedron, Torus or TorusKnot
-        // const geometry = new THREE.BoxGeometry();
-        // const material = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
-        // this.mesh = new THREE.Mesh(geometry, material);
-        // this.scene.add(this.mesh);
+        // Replace Box with Circle, Cone, Cylinder, Dodecahedron, Icosahedron, Octahedron, Plane, Sphere, Tetrahedron, Torus or TorusKnot
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.scene.add(this.mesh);
 
 
         this.raycaster = new THREE.Raycaster();
@@ -182,6 +182,9 @@ class App {
         this.renderer.xr.enabled = true;
         // document.body.appendChild(VRButton.createButton(this.renderer));
         const button = new VRButton(this.renderer);
+
+        const self = this;
+
         function onConnected(event) {
             const info = {};
 
@@ -199,11 +202,11 @@ class App {
                     info[key] = components;
                 });
 
-                this.createButtonStates(info.right);
+                self.createButtonStates(info.right);
 
                 console.log(JSON.stringify(info));
 
-                this.updateControllers(info);
+                self.updateControllers(info);
 
             });
         }
@@ -247,6 +250,7 @@ class App {
     }
 
     updateControllers(info) {
+        const self = this;
 
         function onSelectStart() {
             this.userData.selectPressed = true;
@@ -269,7 +273,7 @@ class App {
         function onSqueezeEnd() {
             this.userData.squeezePressed = false;
             if (this.userData.attachedObject !== undefined) {
-                this.room.attach(this.userData.attachedObject);
+                self.room.attach(this.userData.attachedObject);
                 this.userData.attachedObject = undefined;
             }
         }
@@ -278,16 +282,16 @@ class App {
             const index = this.userData.index;
             console.log(`Disconnected controller ${index}`);
 
-            if (this.controllers) {
-                const obj = (index == 0) ? this.controllers.right : this.controllers.left;
+            if (self.controllers) {
+                const obj = (index == 0) ? self.controllers.right : self.controllers.left;
 
                 if (obj) {
                     if (obj.controller) {
                         const controller = obj.controller;
                         while (controller.children.length > 0) controller.remove(controller.children[0]);
-                        this.scene.remove(controller);
+                        self.scene.remove(controller);
                     }
-                    if (obj.grip) this.scene.remove(obj.grip);
+                    if (obj.grip) self.scene.remove(obj.grip);
                 }
             }
         }
@@ -367,12 +371,13 @@ class App {
 
     render() {
         const dt = this.clock.getDelta();
-        // this.mesh.rotateY(0.01);
+        this.mesh.rotateY(0.01);
 
         if (this.renderer.xr.isPresenting) {
+            const self = this;
             if (this.controllers) {
                 Object.values(this.controllers).forEach((value) => {
-                    this.handleController(value.controller);
+                    self.handleController(value.controller);
                 });
             }
             if (this.elapsedTime === undefined) this.elapsedTime = 0;
