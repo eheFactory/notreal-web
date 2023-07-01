@@ -110,54 +110,64 @@ export class App{
         this.scene.add(this.highlight);
     }
     
-    setupXR(){
+    setupXR() {
         this.renderer.xr.enabled = true;
         document.body.appendChild(VRButton.createButton(this.renderer));
-
+      
         this.controllers = this.buildControllers();
-
-        const onSelectStart = () => {
-            this.children[0].scale.z = 10; // 10 = 10 meters
-            this.userData.selectPressed = true;
-        }
-        const onSelectEnd = () => {
-            this.children[0].scale.z = 0;
-            this.highlight.visible = false;
-            this.userData.selectPressed = false;
-        }
-        this.controllers.forEach((controller) => {
-            controller.addEventListener( 'selectstart', onSelectStart );
-            controller.addEventListener( 'selectend', onSelectEnd );
-        });
-    }
+      
+        const onSelectStart = (event) => {
+            event.target.userData.selectPressed = true;
+            if (event.target.spotlight) event.target.spotlight.visible = true;
+          };
+          
+          const onSelectEnd = (event) => {
+            event.target.children[0].scale.z = 0;
+            event.target.userData.selectPressed = false;
+            if (event.target.spotlight) event.target.spotlight.visible = false;
+          };
+          
+          this.controllers.forEach((controller) => {
+            controller.addEventListener('selectend', onSelectEnd);
+          });
+          
+          this.controllers.forEach((controller) => {
+            controller.addEventListener('selectstart', onSelectStart);
+            controller.addEventListener('selectend', onSelectEnd);
+          });
+      }
+      
     
-    buildControllers() {
+      buildControllers() {
         const controllerModelFactory = new XRControllerModelFactory();
-
-        const geometry = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 ) ] );
-
-        const line = new THREE.Line( geometry );
+      
+        const geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)]);
+      
+        const line = new THREE.Line(geometry);
         line.name = 'line';
-		line.scale.z = 0;
-        
+        line.scale.z = 0;
+      
         const controllers = [];
-        
-        for(let i=0; i<=1; i++){
-            const controller = this.renderer.xr.getController( i );
-            controller.add( line.clone() );
-            controller.userData.selectPressed = false;
-            this.scene.add( controller );
-            
-            controllers.push( controller );
-            
-            const grip = this.renderer.xr.getControllerGrip( i );
-            grip.add( controllerModelFactory.createControllerModel( grip ) );
-            this.scene.add( grip );
+      
+        for (let i = 0; i <= 1; i++) {
+          const controller = this.renderer.xr.getController(i);
+          controller.add(line.clone());
+      
+          // Create userData object for the controller
+          controller.userData = {};
+          controller.userData.selectPressed = false;
+      
+          this.scene.add(controller);
+          controllers.push(controller);
+      
+          const grip = this.renderer.xr.getControllerGrip(i);
+          grip.add(controllerModelFactory.createControllerModel(grip));
+          this.scene.add(grip);
         }
-        
+      
         return controllers;
-    }
-    
+      }
+
     handleController( controller){
         if (controller.userData.selectPressed ){
             controller.children[0].scale.z = 10;
@@ -185,21 +195,18 @@ export class App{
         this.renderer.setSize( window.innerWidth, window.innerHeight );  
     }
     
-	render( ) {   
-        this.mesh.rotateY( 0.01 );
+    render() {
+        this.mesh.rotateY(0.01);
         this.stats.update();
-        
-        if (this.controllers ){
-            const self = this;
-            this.controllers.forEach( ( controller) => { 
-                self.handleController( controller ) 
-            });
-            console.log("render");
+      
+        if (this.controllers) {
+          this.controllers.forEach((controller) => {
+            this.handleController(controller);
+          });
         }
-
-        this.renderer.render( this.scene, this.camera );
-    }
-
+      
+        this.renderer.render(this.scene, this.camera);
+      }
     remove(){}
 }
 

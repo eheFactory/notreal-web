@@ -102,7 +102,7 @@ class VRButton{
         };
 
         button.onmouseleave = function () {
-            console.log(button)
+            
             button.style.fontSize = '30px'; 
             button.innerHTML = '<i class="fas fa-vr-cardboard"></i>';
             button.style.opacity = '0.5';
@@ -174,7 +174,7 @@ class VRButton{
         element.style.textAlign = 'center';
         element.style.opacity = '0.5';
         element.style.outline = 'none';
-        element.style.zIndex = '999';
+        element.style.zIndex = '99999';
 
     }
 

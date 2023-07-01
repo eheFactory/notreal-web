@@ -10,6 +10,7 @@ import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
 export class App{
 	constructor(){
+        this.userData = {};
 		const container = document.createElement( 'div' );
 		document.body.appendChild( container );
 
@@ -110,37 +111,35 @@ export class App{
         this.scene.add(this.highlight);
     }
     
-    setupXR(){
+    setupXR() {
         this.renderer.xr.enabled = true;
-        // const button = new VRButton( this.renderer );
         document.body.appendChild(VRButton.createButton(this.renderer));
-
+      
         const onSelectStart = () => {
-            this.userData.selectPressed = true;
-            if (self.spotlight) self.spotlight.visible = true;
-        }
-
+          this.userData.selectPressed = true;
+          if (this.spotlight) this.spotlight.visible = true;
+        };
+      
         const onSelectEnd = () => {
-            this.highlight.visible = false;
-            this.userData.selectPressed = false;
-            if (this.spotlight) this.spotlight.visible = false;
-        }
-
-        this.controller = this.renderer.xr.getController( 0 );
-        this.controller.addEventListener( 'selectstart', onSelectStart );
-        this.controller.addEventListener( 'selectend', onSelectEnd );
-        this.controller.addEventListener( 'connected', function ( event ) {
-
-            self.buildController.call(self, event.data, this );
-
-        } );
-
-        this.controller.addEventListener( 'disconnected', function () {
-            self.controller = null;
-        } );
-        this.scene.add( this.controller );
+          this.highlight.visible = false;
+          this.userData.selectPressed = false;
+          if (this.spotlight) this.spotlight.visible = false;
+        };
+      
+        this.controller = this.renderer.xr.getController(0);
+        this.controller.addEventListener('selectstart', onSelectStart);
+        this.controller.addEventListener('selectend', onSelectEnd);
+        this.controller.addEventListener('connected', (event) => {
+          this.buildController(event.data, this.controller);
+        });
+      
+        this.controller.addEventListener('disconnected', () => {
+          this.controller = null;
+        });
+        this.scene.add(this.controller);
         this.scene.add(this.highlight);
-    }
+      }
+      
 
     buildController(data, controller){
         let geometry, material, loader;        
