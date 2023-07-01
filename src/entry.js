@@ -203,7 +203,7 @@ class App {
     }
     
     /**
-     * Creates a user interface (UI) panel for the application in the 3D scene.
+     * Creates a user interface (   ) panel for the application in the 3D scene.
      * The UI panel is a text-based panel with specific height and size.
      * 
      * @returns {CanvasUI} The CanvasUI instance representing the UI panel in the scene. This object's 'mesh' property, 
