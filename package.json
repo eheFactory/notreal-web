@@ -18,7 +18,10 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
+    "@webxr-input-profiles/assets": "^1.0.13",
+    "@webxr-input-profiles/motion-controllers": "^1.0.0",
     "font-awesome": "^4.7.0",
+    "stats.js": "^0.17.0",
     "three": "^0.153.0"
   },
   "repository": {
